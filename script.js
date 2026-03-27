@@ -4,10 +4,8 @@ const navLinks = document.querySelectorAll('.nav-link');
 const sections = document.querySelectorAll('section[id]');
 
 window.addEventListener('scroll', () => {
-  // Navbar shadow on scroll
   navbar.classList.toggle('scrolled', window.scrollY > 50);
 
-  // Active link highlight (ScrollSpy)
   let current = '';
   sections.forEach(section => {
     const top = section.offsetTop - 120;
@@ -25,11 +23,15 @@ const navMenu = document.getElementById('navLinks');
 
 navToggle.addEventListener('click', () => {
   navMenu.classList.toggle('open');
+  // Animate hamburger to X
+  navToggle.classList.toggle('active');
 });
 
-// Close mobile menu on link click
 navMenu.querySelectorAll('.nav-link').forEach(link => {
-  link.addEventListener('click', () => navMenu.classList.remove('open'));
+  link.addEventListener('click', () => {
+    navMenu.classList.remove('open');
+    navToggle.classList.remove('active');
+  });
 });
 
 // ==================== DRINK TABS ====================
@@ -47,28 +49,26 @@ tabBtns.forEach(btn => {
 });
 
 // ==================== INTERSECTION OBSERVER ANIMATIONS ====================
-const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -40px 0px' };
+
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
-      entry.target.style.opacity = '1';
-      entry.target.style.transform = 'translateY(0)';
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target); // Only animate once
     }
   });
 }, observerOptions);
 
-// Animate cards on scroll
-document.querySelectorAll('.process-card, .meeting-venue-card, .package-card, .equip-card, .wedding-card, .contact-card, .policy-card').forEach(el => {
-  el.style.opacity = '0';
-  el.style.transform = 'translateY(30px)';
-  el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+// Observe all animate-in elements
+document.querySelectorAll('.animate-in').forEach(el => {
   observer.observe(el);
 });
 
 // Stagger animation for grid items
-document.querySelectorAll('.process-grid, .meeting-grid, .equip-grid, .wedding-grid, .contact-grid').forEach(grid => {
-  const children = grid.children;
-  Array.from(children).forEach((child, i) => {
+document.querySelectorAll('.process-grid, .venue-showcase, .equip-grid, .wedding-grid, .meeting-packages-grid, .policies-grid, .wedding-details').forEach(grid => {
+  const children = grid.querySelectorAll('.animate-in');
+  children.forEach((child, i) => {
     child.style.transitionDelay = `${i * 0.1}s`;
   });
 });
@@ -79,7 +79,9 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     e.preventDefault();
     const target = document.querySelector(this.getAttribute('href'));
     if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const offset = 80; // Account for fixed navbar
+      const y = target.getBoundingClientRect().top + window.pageYOffset - offset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
     }
   });
 });
